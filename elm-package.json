@@ -1,0 +1,14 @@
+{
+    "version": "1.0.0",
+    "summary": "Mario example from elm-lang.org/examples/mario",
+    "repository": "https://github.com/durkiewicz/mario-elm.git",
+    "license": "GNU",
+    "source-directories": [
+        "src"
+    ],
+    "dependencies": {
+        "elm-lang/core": "2.0.1 <= v < 4.0.0"
+    },
+    "exposed-modules": [],
+    "elm-version": "0.15.0 <= v < 0.17.0"
+}
