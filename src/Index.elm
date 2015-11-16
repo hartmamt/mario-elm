@@ -9,11 +9,24 @@ import Window
 -- MODEL
 
 type alias Model =
+  { mario : Mario
+  , ball : Ball
+  , gameOver: Bool
+  }
+
+
+type alias Mario =
   { x : Float
   , y : Float
   , vx : Float
   , vy : Float
   , dir : Direction
+  }
+
+type alias Ball =
+  { x : Float
+  , r : Float
+  , vx : Float
   }
 
 
@@ -23,7 +36,7 @@ type Direction = Left | Right
 type alias Keys = { x:Int, y:Int }
 
 
-mario : Model
+mario : Mario
 mario =
   { x = 0
   , y = 0
@@ -33,32 +46,57 @@ mario =
   }
 
 
+ballMaxDistance : Float
+ballMaxDistance =
+  200
+
+
+ball : Ball
+ball =
+  { x = -1*ballMaxDistance
+  , r = 10
+  , vx = 1
+  }
+
+
+model : Model
+model =
+  { mario = mario
+  , ball = ball
+  , gameOver = False
+  }
+
 -- UPDATE
 
 update : (Float, Keys) -> Model -> Model
-update (dt, keys) mario =
-  mario
-    |> gravity dt
-    |> jump keys
-    |> walk keys
-    |> physics dt
+update (dt, keys) model =
+  let
+    newMario =
+      model.mario
+        |> gravity dt
+        |> jump keys
+        |> walk keys
+        |> physics dt
+  in
+    { model | mario <- newMario
+    }
 
 
-jump : Keys -> Model -> Model
+jump : Keys -> Mario -> Mario
 jump keys mario =
   if keys.y > 0 && mario.vy == 0
     then { mario | vy <- 6.0 }
     else mario
 
 
-gravity : Float -> Model -> Model
+gravity : Float -> Mario -> Mario
 gravity dt mario =
   { mario |
       vy <- if mario.y > 0 then mario.vy - dt/4 else 0
   }
 
 
-physics : Float -> Model -> Model
+physics : Float -> Mario -> Mario
 physics dt mario =
   { mario |
       x <- mario.x + dt * mario.vx,
@@ -66,7 +104,7 @@ physics dt mario =
   }
 
 
-walk : Keys -> Model -> Model
+walk : Keys -> Mario -> Mario
 walk keys mario =
   { mario |
       vx <- toFloat keys.x,
@@ -80,8 +118,10 @@ walk keys mario =
 -- VIEW
 
 view : (Int, Int) -> Model -> Element
-view (w',h') mario =
+view (w',h') model =
   let
+    mario = model.mario
+
     (w,h) = (toFloat w', toFloat h')
 
     verb =
@@ -121,7 +161,7 @@ view (w',h') mario =
 
 main : Signal Element
 main =
-  Signal.map2 view Window.dimensions (Signal.foldp update mario input)
+  Signal.map2 view Window.dimensions (Signal.foldp update model input)
 
 
 input : Signal (Float, Keys)
